@@ -69,7 +69,8 @@ PYBIND11_MODULE(pyopenalsoft, m) {
         .def_property("rolloff_factor", &Source::get_rolloff_factor, &Source::set_rolloff_factor)
         .def_property("max_distance", &Source::get_max_distance, &Source::set_max_distance)
         .def("set_position", &Source::set_position, py::arg("x"), py::arg("y"), py::arg("z"))
-        .def("set_velocity", &Source::set_velocity, py::arg("x"), py::arg("y"), py::arg("z"));
+        .def("set_velocity", &Source::set_velocity, py::arg("x"), py::arg("y"), py::arg("z"))
+        .def("reset", &Source::reset);
 
     py::enum_<DistanceModel>(m, "DistanceModel")
         .value("NONE", DistanceModel::None)

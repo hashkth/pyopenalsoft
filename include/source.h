@@ -44,6 +44,7 @@ public:
 
     void set_position(float x, float y, float z);
     void set_velocity(float x, float y, float z);
+    void reset();
 
     unsigned int id() const { return id_; }
 

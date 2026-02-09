@@ -199,3 +199,19 @@ void Source::set_velocity(float x, float y, float z)
 {
     OpenALLoader::al().alSource3f(id_, AL_VELOCITY, x, y, z);
 }
+
+void Source::reset()
+{
+    auto& al = OpenALLoader::al();
+
+    al.alSourceStop(id_);
+    al.alSourcei(id_, AL_BUFFER, 0);
+
+    al.alSourcef(id_, AL_GAIN, 1.0f);
+    al.alSourcef(id_, AL_PITCH, 1.0f);
+    al.alSourcei(id_, AL_LOOPING, 0);
+    al.alSourcef(id_, AL_SEC_OFFSET, 0.0f);
+
+    al.alSource3f(id_, AL_POSITION, 0.f, 0.f, 0.f);
+    al.alSource3f(id_, AL_VELOCITY, 0.f, 0.f, 0.f);
+}
