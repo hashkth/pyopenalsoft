@@ -15,9 +15,9 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(pyopenalsoft, m) {
-    m.def("init", [](const std::optional<std::string>& path) 
-        { OpenALLoader::init(path.value_or("")); },
-          py::arg("path") = py::none());
+    m.def("init", [](const std::optional<std::string>& path) -> bool { 
+            return OpenALLoader::init(path.value_or("")); 
+        }, py::arg("path") = py::none());
     m.def("shutdown", &OpenALLoader::shutdown);
     m.def("get_dll_path", &OpenALLoader::get_dll_path);
 

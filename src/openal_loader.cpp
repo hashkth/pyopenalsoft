@@ -1,10 +1,8 @@
 #include "openal_loader.h"
-
+#include <windows.h>
 
 static ALCFunctions alc_;
 static ALFunctions al_;
-std::mutex OpenALLoader::mutex_;
-HMODULE OpenALLoader::lib_handle_ = nullptr;
 
 std::string get_default_library_path() 
 {
@@ -24,7 +22,9 @@ std::string get_default_library_path()
 bool OpenALLoader::load_library(const std::string& path) 
 {
     std::string abs_path = std::filesystem::absolute(path).string();
-    lib_handle_ = LoadLibraryA(abs_path.c_str());
+    
+    lib_handle_ = static_cast<void*>(LoadLibraryA(abs_path.c_str()));
+    
     if (!lib_handle_)
     {
         DWORD err = GetLastError();
@@ -43,6 +43,8 @@ bool OpenALLoader::load_library(const std::string& path)
         throw std::runtime_error(oss.str());
     }
 
+    HMODULE h_mod = static_cast<HMODULE>(lib_handle_);
+
     #define LOAD_PROC(lib, name, target) \
         target.name = reinterpret_cast<decltype(target.name)>(GetProcAddress(lib, #name)); \
         if (!target.name) success = false;
@@ -50,48 +52,48 @@ bool OpenALLoader::load_library(const std::string& path)
     bool success = true;
 
     // Load ALC functions
-    LOAD_PROC(lib_handle_, alcOpenDevice, alc_);
-    LOAD_PROC(lib_handle_, alcCloseDevice, alc_);
-    LOAD_PROC(lib_handle_, alcCreateContext, alc_);
-    LOAD_PROC(lib_handle_, alcDestroyContext, alc_);
-    LOAD_PROC(lib_handle_, alcMakeContextCurrent, alc_);
+    LOAD_PROC(h_mod, alcOpenDevice, alc_);
+    LOAD_PROC(h_mod, alcCloseDevice, alc_);
+    LOAD_PROC(h_mod, alcCreateContext, alc_);
+    LOAD_PROC(h_mod, alcDestroyContext, alc_);
+    LOAD_PROC(h_mod, alcMakeContextCurrent, alc_);
 
     // Load AL Buffer functions
-    LOAD_PROC(lib_handle_, alGenBuffers, al_);
-    LOAD_PROC(lib_handle_, alDeleteBuffers, al_);
-    LOAD_PROC(lib_handle_, alBufferData, al_);
+    LOAD_PROC(h_mod, alGenBuffers, al_);
+    LOAD_PROC(h_mod, alDeleteBuffers, al_);
+    LOAD_PROC(h_mod, alBufferData, al_);
 
     // Load AL Source functions
-    LOAD_PROC(lib_handle_, alGenSources, al_);
-    LOAD_PROC(lib_handle_, alDeleteSources, al_);
-    LOAD_PROC(lib_handle_, alSourcei, al_);
-    LOAD_PROC(lib_handle_, alGetSourcei, al_);
-    LOAD_PROC(lib_handle_, alGetSourcef, al_);
-    LOAD_PROC(lib_handle_, alSourcef, al_);
-    LOAD_PROC(lib_handle_, alSource3f, al_);
-    LOAD_PROC(lib_handle_, alSourcePlay, al_);
-    LOAD_PROC(lib_handle_, alSourceStop, al_);
-    LOAD_PROC(lib_handle_, alSourcePause, al_);
-    LOAD_PROC(lib_handle_, alSourceRewind, al_);
-    LOAD_PROC(lib_handle_, alSourceQueueBuffers, al_);
-    LOAD_PROC(lib_handle_, alSourceUnqueueBuffers, al_);
+    LOAD_PROC(h_mod, alGenSources, al_);
+    LOAD_PROC(h_mod, alDeleteSources, al_);
+    LOAD_PROC(h_mod, alSourcei, al_);
+    LOAD_PROC(h_mod, alGetSourcei, al_);
+    LOAD_PROC(h_mod, alGetSourcef, al_);
+    LOAD_PROC(h_mod, alSourcef, al_);
+    LOAD_PROC(h_mod, alSource3f, al_);
+    LOAD_PROC(h_mod, alSourcePlay, al_);
+    LOAD_PROC(h_mod, alSourceStop, al_);
+    LOAD_PROC(h_mod, alSourcePause, al_);
+    LOAD_PROC(h_mod, alSourceRewind, al_);
+    LOAD_PROC(h_mod, alSourceQueueBuffers, al_);
+    LOAD_PROC(h_mod, alSourceUnqueueBuffers, al_);
 
     // Load AL Listener functions
-    LOAD_PROC(lib_handle_, alListenerf, al_);
-    LOAD_PROC(lib_handle_, alListener3f, al_);
-    LOAD_PROC(lib_handle_, alListenerfv, al_);
-    LOAD_PROC(lib_handle_, alGetListenerf, al_);
-    LOAD_PROC(lib_handle_, alGetListenerfv, al_);
+    LOAD_PROC(h_mod, alListenerf, al_);
+    LOAD_PROC(h_mod, alListener3f, al_);
+    LOAD_PROC(h_mod, alListenerfv, al_);
+    LOAD_PROC(h_mod, alGetListenerf, al_);
+    LOAD_PROC(h_mod, alGetListenerfv, al_);
 
     // Load AL Other functions
-    LOAD_PROC(lib_handle_, alDistanceModel, al_);
-    LOAD_PROC(lib_handle_, alGetInteger, al_);
+    LOAD_PROC(h_mod, alDistanceModel, al_);
+    LOAD_PROC(h_mod, alGetInteger, al_);
 
     #undef LOAD_PROC
 
     if (!success)
     {
-        FreeLibrary(lib_handle_);
+        FreeLibrary(h_mod);
         lib_handle_ = nullptr;
         return false;
     }
@@ -130,7 +132,7 @@ void OpenALLoader::shutdown()
     if (!initialized_) return;
     if (lib_handle_)
     {
-        FreeLibrary(lib_handle_);
+        FreeLibrary(static_cast<HMODULE>(lib_handle_));
         lib_handle_ = nullptr;
     }
     initialized_ = false;
