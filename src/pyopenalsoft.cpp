@@ -28,11 +28,10 @@ PYBIND11_MODULE(pyopenalsoft, m) {
     py::class_<Context>(m, "Context")
         .def(py::init<Device&>());
 
-    // Note: forceMono abstracted as surround. If surround, we forcibly convert to mono.
     py::class_<AudioData>(m, "AudioData")
         .def(py::init<const std::string&, bool>(), 
             py::arg("path"), 
-            py::arg("surround") = false)
+            py::arg("force_mono") = false)
         .def_property_readonly("sample_rate", [](const AudioData& a) { return a.sampleRate; })
         .def_property_readonly("channels", [](const AudioData& a) { return a.channels; })
         .def_property_readonly("bits_per_sample", [](const AudioData& a) { return a.bitsPerSample; })
@@ -41,11 +40,11 @@ PYBIND11_MODULE(pyopenalsoft, m) {
         .def_property_readonly("total_samples", [](const AudioData& a) { return a.totalSamples; })
         .def_property_readonly("duration", [](const AudioData& a) { return a.durationSeconds; })
         .def_property_readonly("path", [](const AudioData& a) { return a.sourcePath; })
-        .def_property_readonly("surround", [](const AudioData& a) { return a.forceMono; })
+        .def_property_readonly("force_mono", [](const AudioData& a) { return a.forceMono; })
         .def("decode", [](const AudioData& a)
         {
             auto data = a.decode();
-            return py::bytes(reinterpret_cast<const char*>(data.data()), data.size());
+            return py::bytes(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(int16_t));
         });
 
     py::class_<Buffer>(m, "Buffer")
