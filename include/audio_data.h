@@ -5,10 +5,10 @@
 #include <stdexcept>
 #include <algorithm>
 #include <fstream>
+#include <memory>
+#include <cstring>
 
 
-// The implementation is self-explanatory
-// Refer to dr_wav, dr_mp3 and stb_vorbis docs to understand decoding
 class AudioData
 {
 public:
@@ -19,8 +19,8 @@ public:
     uint64_t totalFrames = 0;
     uint64_t totalSamples = 0;
     double durationSeconds = 0.0;
-    std::string sourcePath;
     bool forceMono = false;
+    std::string sourcePath;
 
     AudioData() = default;
 
@@ -43,8 +43,8 @@ public:
 
     AudioData(const std::string& path, bool forceMono = false);
     
-    std::vector<uint8_t> decode() const;
-    std::vector<uint8_t> decodeMP3() const;
-    std::vector<uint8_t> decodeOGG() const;
-    std::vector<uint8_t> decodeWAV() const;
+    std::vector<int16_t> decode() const;
+    std::vector<int16_t> decodeMP3() const;
+    std::vector<int16_t> decodeOGG() const;
+    std::vector<int16_t> decodeWAV() const;
 };
