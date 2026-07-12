@@ -14,6 +14,8 @@ struct ALCFunctions
     void* (*alcCreateContext)(void*, const int*);
     void  (*alcDestroyContext)(void*);
     int   (*alcMakeContextCurrent)(void*);
+    void* (*alcGetProcAddress)(void*, const char*);
+    void  (*alcGetIntegerv)(void*, int, int, int*);
 };
 
 struct ALFunctions

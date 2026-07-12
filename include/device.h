@@ -17,6 +17,9 @@ public:
     void* handle() const { return device_; }
     bool is_valid() const { return device_ != nullptr; }
 
+    bool is_connected() const;
+    bool reopen(const std::string& name = "");
+
 private:
     void* device_ = nullptr;
 };

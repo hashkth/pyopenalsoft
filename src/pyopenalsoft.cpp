@@ -22,11 +22,12 @@ PYBIND11_MODULE(pyopenalsoft, m) {
     m.def("get_dll_path", &OpenALLoader::get_dll_path);
 
     py::class_<Device>(m, "Device")
-        .def(py::init<const std::string&>(),
-             py::arg("name") = "");
+        .def(py::init<const std::string&>(), py::arg("name") = "")
+        .def_property_readonly("is_connected", &Device::is_connected)
+        .def("reopen", &Device::reopen, py::arg("name") = "");
 
     py::class_<Context>(m, "Context")
-        .def(py::init<Device&>());
+        .def(py::init<Device&>(), py::keep_alive<1, 2>());
 
     py::class_<AudioData>(m, "AudioData")
         .def(py::init<const std::string&, bool>(), 
@@ -41,8 +42,7 @@ PYBIND11_MODULE(pyopenalsoft, m) {
         .def_property_readonly("duration", [](const AudioData& a) { return a.durationSeconds; })
         .def_property_readonly("path", [](const AudioData& a) { return a.sourcePath; })
         .def_property_readonly("force_mono", [](const AudioData& a) { return a.forceMono; })
-        .def("decode", [](const AudioData& a)
-        {
+        .def("decode", [](const AudioData& a) {
             auto data = a.decode();
             return py::bytes(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(int16_t));
         });
