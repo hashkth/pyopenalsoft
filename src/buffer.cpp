@@ -26,7 +26,7 @@ Buffer::Buffer(const AudioData& audio)
             id_,
             format,
             pcm.data(),
-            static_cast<int>(pcm.size()),
+            static_cast<int>(pcm.size() * sizeof(int16_t)),
             audio.sampleRate
         );
     } 

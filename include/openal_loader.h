@@ -21,6 +21,7 @@ struct ALCFunctions
 struct ALFunctions
 {
     void (*alGenBuffers)(int, unsigned int*);
+    void (*alGetBufferiv)(unsigned int, int, int*);
     void (*alDeleteBuffers)(int, const unsigned int*);
     void (*alBufferData)(unsigned int, int, const void*, int, int);
     void (*alGenSources)(int, unsigned int*);

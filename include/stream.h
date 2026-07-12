@@ -1,7 +1,7 @@
 #pragma once
 #include "audio_data.h"
 #include "openal_loader.h"
-
+#include <mutex> // FIX: Added for thread safety between game loop update() and Python input commands
 
 class Stream
 {
@@ -36,7 +36,7 @@ public:
     float get_total_duration() const { return duration_; }
 
 private:
-unsigned int sourceId_ = 0;
+    unsigned int sourceId_ = 0;
     unsigned int bufferIds_[4] = {0, 0, 0, 0};
 
     void* handle_ = nullptr;
@@ -51,9 +51,11 @@ unsigned int sourceId_ = 0;
     bool looping_ = false;
     bool surround_ = false;
 
-    uint64_t samplesProcessed_ = 0;
-    double currentPlayheadBase_ = 0.0;
+    // FIX: Changed tracking paradigm to absolute frames *fully unqueued / heard*
+    uint64_t framesProcessed_ = 0; 
     float duration_ = 0.0f;
+
+    mutable std::mutex mutex_; // FIX: Mutex added to safeguard state changes across frames
 
     bool fill_buffer(unsigned int alBufferId);
     void clear_handle();

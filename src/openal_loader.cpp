@@ -62,6 +62,7 @@ bool OpenALLoader::load_library(const std::string& path)
 
     // Load AL Buffer functions
     LOAD_PROC(h_mod, alGenBuffers, al_);
+    LOAD_PROC(h_mod, alGetBufferiv, al_);
     LOAD_PROC(h_mod, alDeleteBuffers, al_);
     LOAD_PROC(h_mod, alBufferData, al_);
 
