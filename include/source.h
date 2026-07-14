@@ -1,29 +1,32 @@
 #pragma once
 #include "buffer.h"
+#include <tuple>
 
 
 class Source
 {
-public:
+    public:
     Source();
     ~Source();
-
+    
     Source(Source&&) noexcept;
     Source& operator=(Source&&) noexcept;
-
+    
     Source(const Source&) = delete;
     Source& operator=(const Source&) = delete;
+    
+    unsigned int id() const { return id_; }
 
     void play();
     void pause();
     void stop();
+    void reset();
     
     bool is_playing() const;
     bool is_paused() const;
     bool is_stopped() const;
 
     void set_buffer(const Buffer& buffer);
-
     void set_looping(bool loop);
     void set_gain(float gain);
     void set_pitch(float pitch);
@@ -32,7 +35,10 @@ public:
     void set_reference_distance(float distance);
     void set_rolloff_factor(float factor);
     void set_max_distance(float distance);
+    void set_position(float x, float y, float z);
+    void set_velocity(float x, float y, float z);
     
+    int get_buffer() const;
     bool  get_looping() const;
     float get_gain() const;
     float get_pitch() const;
@@ -41,12 +47,8 @@ public:
     float get_reference_distance() const;
     float get_rolloff_factor() const;
     float get_max_distance() const;
-
-    void set_position(float x, float y, float z);
-    void set_velocity(float x, float y, float z);
-    void reset();
-
-    unsigned int id() const { return id_; }
+    std::tuple<float, float, float> get_position() const;
+    std::tuple<float, float, float> get_velocity() const;
 
 private:
     unsigned int id_ = 0;

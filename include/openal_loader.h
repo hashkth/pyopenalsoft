@@ -5,8 +5,6 @@
 #include <sstream>
 #include <filesystem>
 
-// Note: moved #include <windows.h> to .cpp to maintain clean header
-
 struct ALCFunctions
 {
     void* (*alcOpenDevice)(const char*);
@@ -29,6 +27,7 @@ struct ALFunctions
     void (*alSourcei)(unsigned int, int, int);
     void (*alGetSourcei)(unsigned int, int, int*);
     void (*alGetSourcef)(unsigned int, int, float*);
+    void (*alGetSource3f)(unsigned int, int, float*, float*, float*);
     void (*alSourcef)(unsigned int, int, float);
     void (*alSource3f)(unsigned int, int, float, float, float);
     void (*alSourcePlay)(unsigned int);
@@ -42,6 +41,7 @@ struct ALFunctions
     void (*alGetListenerf)(int, float*);
     void (*alGetListenerfv)(int, float*);
     void (*alListener3f)(int, float, float, float);
+    void (*alGetListener3f)(int, float*, float*, float*);
     void (*alDistanceModel)(int);
     int  (*alGetInteger)(int);
 };
@@ -54,16 +54,16 @@ public:
     static bool init(const std::string& path = "");
     static void shutdown();
 
-    static std::filesystem::path get_dll_path() { return dll_path_; }
+    static std::string get_dll_path() { return dll_path_; }
 
     static ALCFunctions& alc();
     static ALFunctions& al();
 
-private:    
-    static bool load_library(const std::string& path);
-
+private:
     static inline void* lib_handle_ = nullptr;
     static inline std::mutex mutex_;
     static inline bool initialized_ = false;
-    static inline std::filesystem::path dll_path_;
+    static inline std::string dll_path_;
+
+    static bool load_library(const std::string& path);  
 };

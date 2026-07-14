@@ -74,6 +74,7 @@ bool OpenALLoader::load_library(const std::string& path)
     LOAD_PROC(h_mod, alGetSourcef, al_);
     LOAD_PROC(h_mod, alSourcef, al_);
     LOAD_PROC(h_mod, alSource3f, al_);
+    LOAD_PROC(h_mod, alGetSource3f, al_);
     LOAD_PROC(h_mod, alSourcePlay, al_);
     LOAD_PROC(h_mod, alSourceStop, al_);
     LOAD_PROC(h_mod, alSourcePause, al_);
@@ -84,6 +85,7 @@ bool OpenALLoader::load_library(const std::string& path)
     // Load AL Listener functions
     LOAD_PROC(h_mod, alListenerf, al_);
     LOAD_PROC(h_mod, alListener3f, al_);
+    LOAD_PROC(h_mod, alGetListener3f, al_);
     LOAD_PROC(h_mod, alListenerfv, al_);
     LOAD_PROC(h_mod, alGetListenerf, al_);
     LOAD_PROC(h_mod, alGetListenerfv, al_);

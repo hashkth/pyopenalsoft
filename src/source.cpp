@@ -134,6 +134,23 @@ void Source::set_max_distance(float distance)
     OpenALLoader::al().alSourcef(id_, AL_MAX_DISTANCE, distance);
 }
 
+void Source::set_position(float x, float y, float z)
+{
+    OpenALLoader::al().alSource3f(id_, AL_POSITION, x, y, z);
+}
+
+void Source::set_velocity(float x, float y, float z)
+{
+    OpenALLoader::al().alSource3f(id_, AL_VELOCITY, x, y, z);
+}
+
+int Source::get_buffer() const
+{
+    int buffer_id = 0;
+    OpenALLoader::al().alGetSourcei(id_, AL_BUFFER, &buffer_id);
+    return buffer_id;
+}
+
 bool Source::get_looping() const
 {
     int loop;
@@ -190,14 +207,18 @@ float Source::get_max_distance() const
     return d;
 }
 
-void Source::set_position(float x, float y, float z)
+std::tuple<float, float, float> Source::get_position() const
 {
-    OpenALLoader::al().alSource3f(id_, AL_POSITION, x, y, z);
+    float x, y, z;
+    OpenALLoader::al().alGetSource3f(id_, AL_POSITION, &x, &y, &z);
+    return std::make_tuple(x, y, z);
 }
 
-void Source::set_velocity(float x, float y, float z)
+std::tuple<float, float, float> Source::get_velocity() const
 {
-    OpenALLoader::al().alSource3f(id_, AL_VELOCITY, x, y, z);
+    float x, y, z;
+    OpenALLoader::al().alGetSource3f(id_, AL_VELOCITY, &x, &y, &z);
+    return std::make_tuple(x, y, z);
 }
 
 void Source::reset()

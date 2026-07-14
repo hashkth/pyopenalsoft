@@ -1,7 +1,8 @@
 #pragma once
 #include "audio_data.h"
 #include "openal_loader.h"
-#include <mutex> // FIX: Added for thread safety between game loop update() and Python input commands
+#include <tuple>
+#include <mutex>
 
 class Stream
 {
@@ -14,26 +15,27 @@ public:
     void pause();
     void stop();
 
+    bool is_playing() const;
+    bool is_paused() const;
+    bool is_stopped() const;
+
     void set_gain(float gain);
-    float get_gain() const;
-
     void set_pitch(float pitch);
-    float get_pitch() const;
-
     void set_offset(float seconds);
-    float get_offset() const;
-    
     void set_looping(bool loop) { looping_ = loop; }
-    bool get_looping() const { return looping_; }
-    
-    void set_surround(bool enable);
-    bool get_surround() const { return surround_; }
-    
+    void set_mono(bool enable);
     void set_position(float x, float y, float z);
     void set_velocity(float x, float y, float z);
     
+    float get_gain() const;
+    float get_pitch() const;
+    float get_offset() const;
+    bool get_looping() const { return looping_; }
+    bool get_mono() const { return mono_; }    
     float get_progress() const;
     float get_total_duration() const { return duration_; }
+    std::tuple<float, float, float> get_position() const;
+    std::tuple<float, float, float> get_velocity() const;
 
 private:
     unsigned int sourceId_ = 0;
@@ -49,13 +51,12 @@ private:
     size_t bufferSize_;
     bool playing_ = false;
     bool looping_ = false;
-    bool surround_ = false;
+    bool mono_ = false;
 
-    // FIX: Changed tracking paradigm to absolute frames *fully unqueued / heard*
     uint64_t framesProcessed_ = 0; 
     float duration_ = 0.0f;
 
-    mutable std::mutex mutex_; // FIX: Mutex added to safeguard state changes across frames
+    mutable std::mutex mutex_;
 
     bool fill_buffer(unsigned int alBufferId);
     void clear_handle();

@@ -45,6 +45,30 @@ void Listener::set_orientation(float fx, float fy, float fz, float ux, float uy,
     OpenALLoader::al().alListenerfv(AL_ORIENTATION, orient);
 }
 
+std::tuple<float, float, float> Listener::get_position()
+{
+    float x, y, z;
+    OpenALLoader::al().alGetListener3f(AL_POSITION, &x, &y, &z);
+    return std::make_tuple(x, y, z);
+}
+
+std::tuple<float, float, float> Listener::get_velocity()
+{
+    float x, y, z;
+    OpenALLoader::al().alGetListener3f(AL_VELOCITY, &x, &y, &z);
+    return std::make_tuple(x, y, z);
+}
+
+std::tuple<float, float, float, float, float, float> Listener::get_orientation()
+{
+    float orient[6];
+    OpenALLoader::al().alGetListenerfv(AL_ORIENTATION, orient);
+    return std::make_tuple(
+        orient[0], orient[1], orient[2], 
+        orient[3], orient[4], orient[5]
+    );
+}
+
 void Listener::reset()
 {
     set_gain(1.0f);

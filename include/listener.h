@@ -1,5 +1,6 @@
 #pragma once
 #include "openal_loader.h"
+#include <tuple>
 
 
 enum class DistanceModel
@@ -16,13 +17,16 @@ enum class DistanceModel
 class Listener
 {
 public:
+    static void reset();
     static void set_gain(float gain);
-    static float get_gain();
     static void set_distance_model(DistanceModel model);
-    static DistanceModel get_distance_model();
-    
     static void set_position(float x, float y, float z);
     static void set_velocity(float x, float y, float z);
     static void set_orientation(float fx, float fy, float fz, float ux, float uy, float uz);
-    static void reset();
+    
+    static float get_gain();
+    static DistanceModel get_distance_model();
+    static std::tuple<float, float, float> get_position();
+    static std::tuple<float, float, float> get_velocity();
+    static std::tuple<float, float, float, float, float, float> get_orientation();
 };
