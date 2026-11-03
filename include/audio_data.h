@@ -19,8 +19,8 @@ public:
     uint64_t totalFrames = 0;
     uint64_t totalSamples = 0;
     double durationSeconds = 0.0;
-    bool forceMono = false;
     std::string sourcePath;
+    bool forceMono = false;
 
     AudioData() = default;
 
