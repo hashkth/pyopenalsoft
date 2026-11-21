@@ -1,6 +1,6 @@
 #pragma once
 #include "openal_loader.h"
-
+#include <vector>
 
 class Device
 {
@@ -16,10 +16,12 @@ public:
 
     void* handle() const { return device_; }
     bool is_valid() const { return device_ != nullptr; }
+    std::vector<std::string> list_devices();
 
     bool is_connected() const;
     bool reopen(const std::string& name = "");
 
 private:
+    // Audio device handle
     void* device_ = nullptr;
 };

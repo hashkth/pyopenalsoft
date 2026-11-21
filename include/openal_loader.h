@@ -7,6 +7,7 @@
 
 struct ALCFunctions
 {
+    // OpenAL Context function pointer table
     void* (*alcOpenDevice)(const char*);
     int   (*alcCloseDevice)(void*);
     void* (*alcCreateContext)(void*, const int*);
@@ -14,10 +15,12 @@ struct ALCFunctions
     int   (*alcMakeContextCurrent)(void*);
     void* (*alcGetProcAddress)(void*, const char*);
     void  (*alcGetIntegerv)(void*, int, int, int*);
+    const char* (*alcGetString)(void*, int);
 };
 
 struct ALFunctions
 {
+    // OpenAL function pointer table
     void (*alGenBuffers)(int, unsigned int*);
     void (*alGetBufferiv)(unsigned int, int, int*);
     void (*alDeleteBuffers)(int, const unsigned int*);
@@ -49,6 +52,7 @@ struct ALFunctions
 class OpenALLoader
 {
 public:
+    // Non instantiable static class
     OpenALLoader() = delete;
 
     static bool init(const std::string& path = "");
@@ -56,11 +60,14 @@ public:
 
     static std::string get_dll_path() { return dll_path_; }
 
+    // Function table accessors
     static ALCFunctions& alc();
     static ALFunctions& al();
 
 private:
+    // Holds the ref to loaded soft_oal.dll
     static inline void* lib_handle_ = nullptr;
+    
     static inline std::mutex mutex_;
     static inline bool initialized_ = false;
     static inline std::string dll_path_;

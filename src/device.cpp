@@ -1,8 +1,10 @@
 #include "device.h"
 
-// Define function signature pointer types locally for OpenAL Soft extensions
-typedef int (*LPALCGETINTEGERV)(void* device, int param, int size, int* values);
+// Definition for querying reopen func later from loaded DLL
 typedef char (*LPALCREOPENDEVICESOFT)(void* device, const char* name, const int* attribs);
+
+constexpr int ALC_ALL_DEVICES_SPECIFIER = 0x1013;
+constexpr int ALC_CONNECTED = 0x313;
 
 Device::Device(const std::string& name)
 {
@@ -38,14 +40,28 @@ bool Device::is_connected() const
 {
     if (!device_) return false;
     int connected = 1;
-    OpenALLoader::alc().alcGetIntegerv(device_, 0x313, 1, &connected); // 0x313 is ALC_CONNECTED
+    OpenALLoader::alc().alcGetIntegerv(device_, ALC_CONNECTED, 1, &connected);
     return connected != 0;
+}
+
+std::vector<std::string> Device::list_devices()
+{
+    std::vector<std::string> devices;
+    const char* list = OpenALLoader::alc().alcGetString(nullptr, ALC_ALL_DEVICES_SPECIFIER);
+    if (!list) return devices;
+    while (*list != '\0')
+    {
+        devices.emplace_back(list);
+        list += devices.back().size() + 1;
+    }
+    return devices;
 }
 
 bool Device::reopen(const std::string& name)
 {
     if (!device_) return false;
-    auto& alc = OpenALLoader::alc();    
+    auto& alc = OpenALLoader::alc();
+    // Query extension dynamically via alcGetProcAddress
     auto alcReopenDeviceSOFT = reinterpret_cast<LPALCREOPENDEVICESOFT>(
         alc.alcGetProcAddress(device_, "alcReopenDeviceSOFT")
     );

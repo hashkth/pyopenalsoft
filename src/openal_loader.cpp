@@ -6,12 +6,13 @@ static ALFunctions al_;
 
 std::string get_default_library_path() 
 {
+    // Returns path to folder containing the .pyd file + subpath
     char path[MAX_PATH];
-    HMODULE hm = NULL;
+    path[0] = '\0';
+    HMODULE hm = nullptr;
     if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | 
                            GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                           (LPCSTR)&get_default_library_path, &hm)) 
-    {
+                           (LPCSTR)&get_default_library_path, &hm)) {
         GetModuleFileNameA(hm, path, sizeof(path));
     }
     std::filesystem::path module_path = std::filesystem::path(path).parent_path();
@@ -21,8 +22,7 @@ std::string get_default_library_path()
 
 bool OpenALLoader::load_library(const std::string& path) 
 {
-    std::string abs_path = std::filesystem::absolute(path).string();
-    
+    std::string abs_path = std::filesystem::absolute(path).string();    
     lib_handle_ = static_cast<void*>(LoadLibraryA(abs_path.c_str()));
     
     if (!lib_handle_)
@@ -31,25 +31,21 @@ bool OpenALLoader::load_library(const std::string& path)
         std::ostringstream oss;
         oss << "Failed to load OpenAL library at: " << abs_path << "\n"
             << "Error Code: " << err << "\n";
-        if (err == ERROR_BAD_EXE_FORMAT)
-        {
+        if (err == ERROR_BAD_EXE_FORMAT) {
             oss << "Error: Architecture mismatch - Ensure both Python and the DLL are " 
                 << (sizeof(void*) == 8 ? "64-bit" : "32-bit");
-        }
-        else
-        {
+        } else {
             oss << "Error: DLL not found at specified path";
         }
         throw std::runtime_error(oss.str());
     }
 
     HMODULE h_mod = static_cast<HMODULE>(lib_handle_);
+    bool success = true;
 
     #define LOAD_PROC(lib, name, target) \
         target.name = reinterpret_cast<decltype(target.name)>(GetProcAddress(lib, #name)); \
         if (!target.name) success = false;
-
-    bool success = true;
 
     // Load ALC functions
     LOAD_PROC(h_mod, alcOpenDevice, alc_);
@@ -59,6 +55,7 @@ bool OpenALLoader::load_library(const std::string& path)
     LOAD_PROC(h_mod, alcMakeContextCurrent, alc_);
     LOAD_PROC(h_mod, alcGetProcAddress, alc_);
     LOAD_PROC(h_mod, alcGetIntegerv, alc_);
+    LOAD_PROC(h_mod, alcGetString, alc_);
 
     // Load AL Buffer functions
     LOAD_PROC(h_mod, alGenBuffers, al_);
@@ -123,6 +120,7 @@ bool OpenALLoader::init(const std::string& path)
 {
     std::lock_guard lock(mutex_);
     if (initialized_) return true;
+    // Use soft_oal.dll shipped with pyopenalsoft if no path specified
     std::filesystem::path p = path.empty() ? get_default_library_path() : path;
     if (!load_library(p.string()))
         return false;
