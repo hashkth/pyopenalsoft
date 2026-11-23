@@ -1,6 +1,5 @@
 #include "source.h"
 
-
 constexpr int AL_BUFFER   = 0x1009;
 constexpr int AL_LOOPING  = 0x1007;
 constexpr int AL_GAIN     = 0x100A;
@@ -40,8 +39,7 @@ Source::Source(Source&& other) noexcept
 
 Source& Source::operator=(Source&& other) noexcept
 {
-    if (this != &other)
-    {
+    if (this != &other) {
         if (id_)
             OpenALLoader::al().alDeleteSources(1, &id_);
         id_ = other.id_;

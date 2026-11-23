@@ -2,7 +2,6 @@
 #include "audio_data.h"
 #include "openal_loader.h"
 
-
 class Buffer
 {
 public:

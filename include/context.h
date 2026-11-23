@@ -17,5 +17,6 @@ public:
     bool is_valid() const { return context_ != nullptr; }
 
 private:
+    // Context handle
     void* context_ = nullptr;
 };

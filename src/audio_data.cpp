@@ -27,6 +27,7 @@ static Format get_format(const std::string& path)
 
 static std::vector<int16_t> downmix_16bit(const int16_t* stereo, size_t frames)
 {
+    // Interleaved stereo L, R samples --> averaged into mono
     std::vector<int16_t> mono(frames);
     for (size_t i = 0; i < frames; ++i) {
         int32_t avg = (static_cast<int32_t>(stereo[i * 2]) + static_cast<int32_t>(stereo[i * 2 + 1])) / 2;
@@ -86,6 +87,11 @@ std::vector<int16_t> AudioData::decode() const
         default: throw std::runtime_error("Unsupported format: " + sourcePath);
     }
 }
+
+// Decoding process:
+// - load the file and read frames into temp
+// - downmix if forceMono
+// - resize temp to actual number of samples
 
 std::vector<int16_t> AudioData::decodeWAV() const
 {

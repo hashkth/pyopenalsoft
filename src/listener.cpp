@@ -1,6 +1,5 @@
 #include "listener.h"
 
-
 constexpr int AL_POSITION    = 0x1004;
 constexpr int AL_VELOCITY    = 0x1006;
 constexpr int AL_ORIENTATION = 0x100F;

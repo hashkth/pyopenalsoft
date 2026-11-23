@@ -2,7 +2,6 @@
 #include "openal_loader.h"
 #include <tuple>
 
-
 enum class DistanceModel
 {
     None = 0,

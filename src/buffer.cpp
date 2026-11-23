@@ -1,6 +1,5 @@
 #include "buffer.h"
 
-
 constexpr int AL_FORMAT_MONO16   = 0x1101;
 constexpr int AL_FORMAT_STEREO16 = 0x1103;
 
@@ -16,8 +15,8 @@ Buffer::Buffer(const AudioData& audio)
     OpenALLoader::al().alGenBuffers(1, &id_);
     if (!id_)
         throw std::runtime_error("Failed to create OpenAL buffer");
-    try
-    {
+    try {
+        // Decode to PCM data and create a buffer for it
         auto pcm = audio.decode();
         if (pcm.empty())
             throw std::runtime_error("Decoded audio is empty for: " + audio.sourcePath);
@@ -29,9 +28,7 @@ Buffer::Buffer(const AudioData& audio)
             static_cast<int>(pcm.size() * sizeof(int16_t)),
             audio.sampleRate
         );
-    } 
-    catch (...)
-    {
+    }  catch (...) {
         OpenALLoader::al().alDeleteBuffers(1, &id_);
         throw;
     }
@@ -49,8 +46,7 @@ Buffer::Buffer(Buffer&& other) noexcept : id_(other.id_)
 
 Buffer& Buffer::operator=(Buffer&& other) noexcept
 {
-    if (this != &other)
-    {
+    if (this != &other) {
         if (id_) OpenALLoader::al().alDeleteBuffers(1, &id_);
         id_ = other.id_;
         other.id_ = 0;

@@ -8,7 +8,6 @@
 #include <memory>
 #include <cstring>
 
-
 class AudioData
 {
 public:
@@ -20,7 +19,7 @@ public:
     uint64_t totalSamples = 0;
     double durationSeconds = 0.0;
     std::string sourcePath;
-    bool forceMono = false;
+    bool forceMono = false; // forcibly downmixes to a single channel if true
 
     AudioData() = default;
 
@@ -36,9 +35,7 @@ public:
           forceMono(forceMono_)
         {
             totalSamples = totalFrames * channels;
-            durationSeconds =
-                static_cast<double>(totalFrames) /
-                static_cast<double>(sampleRate);
+            durationSeconds = static_cast<double>(totalFrames) / sampleRate;
         }
 
     AudioData(const std::string& path, bool forceMono = false);

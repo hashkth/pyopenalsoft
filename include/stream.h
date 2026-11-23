@@ -39,9 +39,13 @@ public:
 
 private:
     unsigned int sourceId_ = 0;
+
+    // Ring buffer ids
     unsigned int bufferIds_[4] = {0, 0, 0, 0};
 
+    // Pointer to decoder instance: drwav* / drmp3* / stb_vorbis*
     void* handle_ = nullptr;
+
     int format_ = 0;
     int alFormat_ = 0;
     int sampleRate_ = 0;

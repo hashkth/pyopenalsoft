@@ -39,12 +39,14 @@ Stream::Stream(const std::string& path, size_t bufferSize) :
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
+    // Generate ring buffer elements and a source for playback
     OpenALLoader::al().alGenSources(1, &sourceId_);
     OpenALLoader::al().alGenBuffers(4, bufferIds_);
     
     std::string ext = path.substr(path.find_last_of(".") + 1);
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
     
+    // Load basic metadata
     if (ext == "wav") {
         drwav* wav = new drwav();
         if (drwav_init_file(wav, path.c_str(), nullptr)) {
@@ -83,7 +85,6 @@ Stream::Stream(const std::string& path, size_t bufferSize) :
     OpenALLoader::al().alSourceRewind(sourceId_);
     OpenALLoader::al().alSourcei(sourceId_, AL_BUFFER, 0);
     
-    framesProcessed_ = 0;
     for (int i = 0; i < 4; ++i) {
         if (fill_buffer(bufferIds_[i])) 
             OpenALLoader::al().alSourceQueueBuffers(sourceId_, 1, &bufferIds_[i]);
@@ -172,8 +173,7 @@ void Stream::update()
     while (processed-- > 0) {
         unsigned int bufferId = 0;
         OpenALLoader::al().alSourceUnqueueBuffers(sourceId_, 1, &bufferId);
-        if (bufferId != 0)
-        {
+        if (bufferId != 0) {
             int sizeInBytes = 0;
             int bufferChannels = 0;
             
@@ -182,8 +182,7 @@ void Stream::update()
             
             if (bufferChannels > 0) {
                 size_t framesPlayed = (sizeInBytes / sizeof(int16_t)) / bufferChannels;
-                framesProcessed_ += framesPlayed;
-                
+                framesProcessed_ += framesPlayed;                
                 uint64_t totalFileFrames = static_cast<uint64_t>(duration_ * sampleRate_);
                 if (looping_ && totalFileFrames > 0)
                     framesProcessed_ %= totalFileFrames;
@@ -214,6 +213,23 @@ void Stream::update()
             stop();
         }
     }
+}
+
+void Stream::clear_handle() 
+{
+    if (!handle_) return;
+    switch (format_) {
+        case StreamFormat::WAV: delete static_cast<drwav*>(handle_); break;
+        case StreamFormat::MP3: delete static_cast<drmp3*>(handle_); break;
+        case StreamFormat::OGG: stb_vorbis_close(static_cast<stb_vorbis*>(handle_)); break;
+    }
+    handle_ = nullptr;
+}
+
+void Stream::clear_queue()
+{
+    OpenALLoader::al().alSourceRewind(sourceId_); 
+    OpenALLoader::al().alSourcei(sourceId_, AL_BUFFER, 0); 
 }
 
 void Stream::play()
@@ -248,23 +264,6 @@ void Stream::stop()
             OpenALLoader::al().alSourceQueueBuffers(sourceId_, 1, &bufferIds_[i]);
     }
     framesProcessed_ = 0;
-}
-
-void Stream::clear_handle() 
-{
-    if (!handle_) return;
-    switch (format_) {
-        case StreamFormat::WAV: delete static_cast<drwav*>(handle_); break;
-        case StreamFormat::MP3: delete static_cast<drmp3*>(handle_); break;
-        case StreamFormat::OGG: stb_vorbis_close(static_cast<stb_vorbis*>(handle_)); break;
-    }
-    handle_ = nullptr;
-}
-
-void Stream::clear_queue()
-{
-    OpenALLoader::al().alSourceRewind(sourceId_); 
-    OpenALLoader::al().alSourcei(sourceId_, AL_BUFFER, 0); 
 }
 
 bool Stream::is_playing() const
