@@ -13,9 +13,9 @@ PYTHON_SUFFIX = $(subst .,,$(VER))
 
 ifneq ($(strip $(VER)),)
     PYTHON = py -$(VER)
-    PY_PATH = $(shell $(PYTHON) -c "import sys; print(sys.prefix)")
+    PY_PATH = $(subst \,/,$(shell $(PYTHON) -c "import sys; print(sys.prefix)"))
     PY_INCLUDE = $(PY_PATH)/include
-    PYBIND11_INCLUDE = $(shell $(PYTHON) -c "import pybind11; print(pybind11.get_include())")
+    PYBIND11_INCLUDE = $(subst \,/,$(shell $(PYTHON) -c "import pybind11; print(pybind11.get_include())"))
 endif
 
 CXX := g++
