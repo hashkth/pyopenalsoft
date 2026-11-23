@@ -6,7 +6,7 @@ ifneq ($(strip $(VER)),)
 MAKEFLAGS += -j4
 endif
 
-VERSIONS := 3.11 3.12 3.13
+VERSIONS := 3.11 3.12 3.13 3.14
 VER ?=
 
 PYTHON_SUFFIX = $(subst .,,$(VER))
