@@ -1,8 +1,14 @@
 #include "openal_loader.h"
+#include "context.h"
+#include "device.h"
 #include <windows.h>
+#include <algorithm>
 
 static ALCFunctions alc_;
 static ALFunctions al_;
+
+std::vector<Context*> OpenALLoader::contexts_;
+std::vector<Device*> OpenALLoader::devices_;
 
 std::string get_default_library_path() 
 {
@@ -135,15 +141,70 @@ bool OpenALLoader::is_initialized()
     return initialized_;
 }
 
+void OpenALLoader::register_context(Context* ctx)
+{
+    if (!ctx) return;
+    std::lock_guard lock(mutex_);
+    if (std::find(contexts_.begin(), contexts_.end(), ctx) == contexts_.end()) {
+        contexts_.push_back(ctx);
+    }
+}
+
+void OpenALLoader::unregister_context(Context* ctx)
+{
+    if (!ctx) return;
+    std::lock_guard lock(mutex_);
+    contexts_.erase(std::remove(contexts_.begin(), contexts_.end(), ctx), contexts_.end());
+}
+
+void OpenALLoader::register_device(Device* dev)
+{
+    if (!dev) return;
+    std::lock_guard lock(mutex_);
+    if (std::find(devices_.begin(), devices_.end(), dev) == devices_.end()) {
+        devices_.push_back(dev);
+    }
+}
+
+void OpenALLoader::unregister_device(Device* dev)
+{
+    if (!dev) return;
+    std::lock_guard lock(mutex_);
+    devices_.erase(std::remove(devices_.begin(), devices_.end(), dev), devices_.end());
+}
+
 void OpenALLoader::shutdown()
 {
+    std::vector<Context*> contexts_to_close;
+    std::vector<Device*> devices_to_close;
+
+    {
+        std::lock_guard lock(mutex_);
+        if (!initialized_) return;
+        contexts_to_close = contexts_;
+        devices_to_close = devices_;
+    }
+
+    for (Context* ctx : contexts_to_close) {
+        if (ctx) {
+            ctx->close();
+        }
+    }
+
+    for (Device* dev : devices_to_close) {
+        if (dev) {
+            dev->close();
+        }
+    }
+
     std::lock_guard lock(mutex_);
     if (!initialized_) return;
-    if (lib_handle_)
-    {
+    if (lib_handle_) {
         FreeLibrary(static_cast<HMODULE>(lib_handle_));
         lib_handle_ = nullptr;
     }
+    contexts_.clear();
+    devices_.clear();
     initialized_ = false;
     dll_path_.clear();
 }

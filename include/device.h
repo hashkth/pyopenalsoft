@@ -20,6 +20,7 @@ public:
 
     bool is_connected() const;
     bool reopen(const std::string& name = "");
+    void close();
 
 private:
     // Audio device handle

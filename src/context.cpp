@@ -13,9 +13,10 @@ Context::Context(Device& device)
         context_ = nullptr;
         throw std::runtime_error("Failed to make OpenAL context current");
     }
+    OpenALLoader::register_context(this);
 }
 
-Context::~Context()
+void Context::close()
 {
     if (context_) {
         if (OpenALLoader::is_initialized()) {
@@ -27,24 +28,30 @@ Context::~Context()
     }
 }
 
+Context::~Context()
+{
+    close();
+    OpenALLoader::unregister_context(this);
+}
+
 Context::Context(Context&& other) noexcept
 {
     context_ = other.context_;
     other.context_ = nullptr;
+    if (context_) {
+        OpenALLoader::register_context(this);
+    }
 }
 
 Context& Context::operator=(Context&& other) noexcept
 {
     if (this != &other) {
-        if (context_) {
-            if (OpenALLoader::is_initialized()) {
-                auto& alc = OpenALLoader::alc();
-                alc.alcMakeContextCurrent(nullptr);
-                alc.alcDestroyContext(context_);
-            }
-        }
+        close();
         context_ = other.context_;
         other.context_ = nullptr;
+        if (context_) {
+            OpenALLoader::register_context(this);
+        }
     }
     return *this;
 }

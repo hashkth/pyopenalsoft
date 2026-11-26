@@ -15,6 +15,7 @@ public:
     Context& operator=(Context&& other) noexcept;
 
     bool is_valid() const { return context_ != nullptr; }
+    void close();
 
 private:
     // Context handle

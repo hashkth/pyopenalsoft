@@ -11,9 +11,10 @@ Device::Device(const std::string& name)
     device_ = OpenALLoader::alc().alcOpenDevice(name.empty() ? nullptr : name.c_str());
     if (!device_)
         throw std::runtime_error("Failed to open OpenAL device");
+    OpenALLoader::register_device(this);
 }
 
-Device::~Device() 
+void Device::close()
 {
     if (device_) {
         if (OpenALLoader::is_initialized()) {
@@ -23,22 +24,30 @@ Device::~Device()
     }
 }
 
+Device::~Device()
+{
+    close();
+    OpenALLoader::unregister_device(this);
+}
+
 Device::Device(Device&& other) noexcept 
 {
     device_ = other.device_;
     other.device_ = nullptr;
+    if (device_) {
+        OpenALLoader::register_device(this);
+    }
 }
 
 Device& Device::operator=(Device&& other) noexcept 
 {
     if (this != &other) {
-        if (device_) {
-            if (OpenALLoader::is_initialized()) {
-                OpenALLoader::alc().alcCloseDevice(device_);
-            }
-        }
+        close();
         device_ = other.device_;
         other.device_ = nullptr;
+        if (device_) {
+            OpenALLoader::register_device(this);
+        }
     }
     return *this;
 }

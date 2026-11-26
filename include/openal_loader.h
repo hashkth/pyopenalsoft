@@ -4,6 +4,10 @@
 #include <stdexcept>
 #include <sstream>
 #include <filesystem>
+#include <vector>
+
+class Context;
+class Device;
 
 struct ALCFunctions
 {
@@ -61,6 +65,12 @@ public:
     static std::string get_dll_path() { return dll_path_; }
     static bool is_initialized();
 
+    // Context and Device registry methods for auto-cleanup during shutdown()
+    static void register_context(Context* ctx);
+    static void unregister_context(Context* ctx);
+    static void register_device(Device* dev);
+    static void unregister_device(Device* dev);
+
     // Function table accessors
     static ALCFunctions& alc();
     static ALFunctions& al();
@@ -68,6 +78,10 @@ public:
 private:
     // Holds the ref to loaded soft_oal.dll
     static inline void* lib_handle_ = nullptr;
+
+    // Context and Device containers
+    static std::vector<Context*> contexts_;
+    static std::vector<Device*> devices_;
     
     static inline std::mutex mutex_;
     static inline bool initialized_ = false;
