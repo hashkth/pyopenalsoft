@@ -18,9 +18,12 @@ Context::Context(Device& device)
 Context::~Context()
 {
     if (context_) {
-        auto& alc = OpenALLoader::alc();
-        alc.alcMakeContextCurrent(nullptr);
-        alc.alcDestroyContext(context_);
+        if (OpenALLoader::is_initialized()) {
+            auto& alc = OpenALLoader::alc();
+            alc.alcMakeContextCurrent(nullptr);
+            alc.alcDestroyContext(context_);
+        }
+        context_ = nullptr;
     }
 }
 
@@ -34,9 +37,11 @@ Context& Context::operator=(Context&& other) noexcept
 {
     if (this != &other) {
         if (context_) {
-            auto& alc = OpenALLoader::alc();
-            alc.alcMakeContextCurrent(nullptr);
-            alc.alcDestroyContext(context_);
+            if (OpenALLoader::is_initialized()) {
+                auto& alc = OpenALLoader::alc();
+                alc.alcMakeContextCurrent(nullptr);
+                alc.alcDestroyContext(context_);
+            }
         }
         context_ = other.context_;
         other.context_ = nullptr;

@@ -59,6 +59,7 @@ public:
     static void shutdown();
 
     static std::string get_dll_path() { return dll_path_; }
+    static bool is_initialized();
 
     // Function table accessors
     static ALCFunctions& alc();

@@ -15,8 +15,12 @@ Device::Device(const std::string& name)
 
 Device::~Device() 
 {
-    if (device_)
-        OpenALLoader::alc().alcCloseDevice(device_);
+    if (device_) {
+        if (OpenALLoader::is_initialized()) {
+            OpenALLoader::alc().alcCloseDevice(device_);
+        }
+        device_ = nullptr;
+    }
 }
 
 Device::Device(Device&& other) noexcept 
@@ -28,8 +32,11 @@ Device::Device(Device&& other) noexcept
 Device& Device::operator=(Device&& other) noexcept 
 {
     if (this != &other) {
-        if (device_)
-            OpenALLoader::alc().alcCloseDevice(device_);
+        if (device_) {
+            if (OpenALLoader::is_initialized()) {
+                OpenALLoader::alc().alcCloseDevice(device_);
+            }
+        }
         device_ = other.device_;
         other.device_ = nullptr;
     }

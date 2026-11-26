@@ -36,7 +36,10 @@ Buffer::Buffer(const AudioData& audio)
 
 Buffer::~Buffer()
 {
-    if (id_) OpenALLoader::al().alDeleteBuffers(1, &id_);
+    if (id_ && OpenALLoader::is_initialized()) {
+        OpenALLoader::al().alDeleteBuffers(1, &id_);
+    }
+    id_ = 0;
 }
 
 Buffer::Buffer(Buffer&& other) noexcept : id_(other.id_)
@@ -47,7 +50,9 @@ Buffer::Buffer(Buffer&& other) noexcept : id_(other.id_)
 Buffer& Buffer::operator=(Buffer&& other) noexcept
 {
     if (this != &other) {
-        if (id_) OpenALLoader::al().alDeleteBuffers(1, &id_);
+        if (id_ && OpenALLoader::is_initialized()) {
+            OpenALLoader::al().alDeleteBuffers(1, &id_);
+        }
         id_ = other.id_;
         other.id_ = 0;
     }

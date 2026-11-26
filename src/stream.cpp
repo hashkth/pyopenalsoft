@@ -96,12 +96,16 @@ Stream::Stream(const std::string& path, size_t bufferSize) :
 Stream::~Stream()
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (sourceId_) {
-        OpenALLoader::al().alSourceStop(sourceId_);
-        clear_queue();
-        OpenALLoader::al().alDeleteSources(1, &sourceId_);
+    if (OpenALLoader::is_initialized()) {
+        if (sourceId_) {
+            OpenALLoader::al().alSourceStop(sourceId_);
+            clear_queue();
+            OpenALLoader::al().alDeleteSources(1, &sourceId_);
+        }
+        OpenALLoader::al().alDeleteBuffers(4, bufferIds_);
     }
-    OpenALLoader::al().alDeleteBuffers(4, bufferIds_);
+    sourceId_ = 0;
+    std::fill(std::begin(bufferIds_), std::end(bufferIds_), 0);
     clear_handle();
 }
 

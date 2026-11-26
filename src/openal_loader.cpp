@@ -129,6 +129,12 @@ bool OpenALLoader::init(const std::string& path)
     return true;
 }
 
+bool OpenALLoader::is_initialized()
+{
+    std::lock_guard lock(mutex_);
+    return initialized_;
+}
+
 void OpenALLoader::shutdown()
 {
     std::lock_guard lock(mutex_);

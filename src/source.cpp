@@ -27,8 +27,10 @@ Source::Source()
 
 Source::~Source()
 {
-    if (id_)
+    if (id_ && OpenALLoader::is_initialized()) {
         OpenALLoader::al().alDeleteSources(1, &id_);
+    }
+    id_ = 0;
 }
 
 Source::Source(Source&& other) noexcept
@@ -40,8 +42,9 @@ Source::Source(Source&& other) noexcept
 Source& Source::operator=(Source&& other) noexcept
 {
     if (this != &other) {
-        if (id_)
+        if (id_ && OpenALLoader::is_initialized()) {
             OpenALLoader::al().alDeleteSources(1, &id_);
+        }
         id_ = other.id_;
         other.id_ = 0;
     }
